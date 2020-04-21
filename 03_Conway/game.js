@@ -139,7 +139,7 @@ class Automaton {
     getConfiguration() {
         var configuration = ""
         configuration += this.width+"\n";
-        configuration += "1" +" " +this.prob+"\n";
+        configuration += "0" +" " +this.prob+"\n";
         configuration += time+"\n";
         for(var i = 0; i < this.height; i++)
         {
@@ -303,7 +303,7 @@ fileInput.onchange = function(event) {
         window.navigator.msSaveOrOpenBlob(file, filename);
     else { // Others
         var a = document.createElement("a"),
-                url = URL.createObjectURL(file);
+        url = URL.createObjectURL(file);
         a.href = url;
         a.download = filename;
         document.body.appendChild(a);
