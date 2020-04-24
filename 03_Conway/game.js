@@ -163,7 +163,7 @@ class Automaton {
 
     getConfiguration() {
         var configuration = ""
-        configuration += this.width+"\n";
+        configuration += this.width + "\n";
         configuration += "0" +" " +this.prob+"\n";
         configuration += time+"\n";
         for(var i = 0; i < this.height; i++)
