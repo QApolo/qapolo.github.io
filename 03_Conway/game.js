@@ -42,9 +42,10 @@ class Automaton {
                 if(this.matrix[i][j] == 1)
                     setColor();
                 else
-                    context.fillStyle = "white";
+                    setWhiteColor();
                 
                 context.fillRect(cellSizeBordered*j, cellSizeBordered*i, cellSize, cellSize);
+                context.stroke();
             }
         }
 
@@ -58,13 +59,17 @@ class Automaton {
     countLivingNeighbours(y, x, mirrorNeigh = true) {
         var cont = 0;
         for(var i = 0; i < 8; i++) {
-            var auxY = (this.movs[i][0] + y);
-            var auxX = (this.movs[i][1] + x);
-
-            if(mirrorNeigh) {
-                 auxY = auxY % this.height;
-                 auxX = auxX % this.width;
-            }   
+            var auxY = (this.movs[i][0] +y);
+            var auxX = (this.movs[i][1] +x);
+            //console.log(size);
+            /*if (mirrorNeigh == true) {                
+                 auxY = mod(this.movs[i][0] + y, size);
+                 auxX = mod(this.movs[i][1] + x, size);
+                 console.log(auxY + " " + auxX);
+                 if(auxX < 0 || auxY < 0)
+                    console.log(auxY + " " + auxX);
+                 //console.log(auxY + " " + auxX);
+            }   */
             if( this.valid(auxY, auxX) ) {                              
                 if(this.matrix[auxY][auxX] == 1) {
                     cont++;
@@ -74,30 +79,49 @@ class Automaton {
         return cont;
 
     }
-    routine(evt) {        
-        var me = this
+    routine(evt) {    
+        
+        for(var i = 0; i < this.width; i++) {
+            for(var j = 0; j < this.height; j++) {
+                
+                if(this.matrix[i][j] == 1)
+                    setColor();
+                else
+                    setWhiteColor();
+                
+                context.fillRect(cellSizeBordered*j, cellSizeBordered*i, cellSize, cellSize);                
+            }
+        }
+
+        var me = this;
         var waitTime = 50;
+
         if(this.size >= 500)
             waitTime = 0;
         var counter = 0;
+
+
         var drawGrid = function(me) {
 
             var states = [];
             var count_ones = 0;
             for(var i = 0; i < me.width; i++) {
                 count_ones = 0;
-                for(var j = 0; j < me.height; j++) {                
-                    if(me.matrix[i][j] == 1)
-                    {
+                for(var j = 0; j < me.height; j++) {     
+                    let r_vals = document.getElementById("R_evol").value.split(",");
+                    if(r_vals.length != 4)
+                        return;
+                    //console.log(r_vals);
+                    if(me.matrix[i][j] == 1) {
                         count_ones++;
                         var count = me.countLivingNeighbours(i, j);
-                        if(!(count == 2 || count == 3)) {
+                        if(!(count >= parseInt(r_vals[0]) && count <= parseInt(r_vals[1]))) {
                             states.push([i, j, 0]);
                         }
                     }
                     else if(me.matrix[i][j] == 0) {
                         var count = me.countLivingNeighbours(i, j);
-                        if( count == 3 ) {
+                        if( count >= parseInt(r_vals[2]) && count <= parseInt(r_vals[3]) ) {
                             states.push([i, j, 1]);
                         }
                     }
@@ -112,11 +136,12 @@ class Automaton {
                 if(states[i][2] == 1)
                     setColor();
                 else
-                    context.fillStyle = "white";
+                    setWhiteColor();
                 context.fillRect(cellSizeBordered * states[i][1], cellSizeBordered*states[i][0], cellSize, cellSize);
+                context.stroke();
             }
             time--;
-            if(time >= 0 && document.getElementById("file").disabled == false) {
+            if(time >= 0) {
                 setTimeout(drawGrid, waitTime, me);
             }       
         };
@@ -153,6 +178,10 @@ class Automaton {
     }
 }
 
+function mod(n, m) {
+    return ((n % m) + m) % m;
+}
+
 function shuffle(a) {
     var j, x, i;
     for (i = a.length - 1; i > 0; i--) {
@@ -176,11 +205,15 @@ function setColor()
 {
     context.fillStyle = "#"+document.getElementById("colorChooser").value;
 }
+function setWhiteColor() {
+    context.fillStyle = "white";
+}
 var myCanvas = document.querySelector("canvas");
 var size_param = document.getElementById("size_param");
 var prob_param = document.getElementById("probability_param");
 var prob = prob_param.value;
 var size = size_param.value;
+
 
 prob_param.oninput = function() {
     if( prob_param.value >= 0 && prob_param.value <= 1) {
@@ -206,6 +239,7 @@ size_param.oninput = function()
 
 }
 var context = myCanvas.getContext("2d");
+context.strokeStyle = "red";
 setColor();
 
 startButton = document.getElementById("start");
@@ -271,7 +305,7 @@ fileInput.onchange = function(event) {
 
     if(is_prob) {
         prob = parseFloat(splitted[1].split(" ")[1]);
-        console.log(prob);
+        //console.log(prob);
         automaton = new Automaton(size, size, prob);
         return;
     }
@@ -287,8 +321,9 @@ fileInput.onchange = function(event) {
                 context.fillRect(j*cellSizeBordered, (i-3)*cellSizeBordered, cellSize, cellSize);                
             }
             else {
-                context.fillStyle = "white";
+                setWhiteColor();
                 context.fillRect(j*cellSizeBordered, (i-3)*cellSizeBordered, cellSize, cellSize);
+                context.stroke();
                 automaton.setValueCell(j, i-3, 0);
             }
         }            
